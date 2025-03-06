@@ -1,0 +1,46 @@
+div#prompt-input-wrapper {
+    width: 90%;
+    height: 5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: solid 3px var(--main-foreground-color);
+}
+
+div#prompt-input {
+    width: 85%;
+}
+
+input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    font-family: unset;
+    text-transform: unset;
+    font-size: 1.75rem;
+    color: var(--main-foreground-color);
+}
+
+input:focus {
+    outline: none;
+}
+
+div#prompt-action-buttons {
+    width: 10%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#prompt-action-speech {
+    height: 20px;
+    color: var(--main-foreground-color);
+}
+
+#prompt-action-proceed {
+    font-size: 1.75rem;
+    padding-left: 8px;
+}
