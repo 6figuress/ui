@@ -7,8 +7,6 @@
     font-style: normal;
     font-weight: 400;
     text-transform: uppercase;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
     color: var(--main-foreground-color);
 
     background-color: var(--background-color);

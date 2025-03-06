@@ -35,6 +35,10 @@ div#prompt-action-buttons {
     align-items: center;
 }
 
+.prompt-action-button {
+    cursor: pointer;
+}
+
 #prompt-action-speech {
     height: 20px;
     color: var(--main-foreground-color);

@@ -15,10 +15,15 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.0.4",
+    "@stripe/stripe-js": "^5.9.2",
     "@types/three": "^0.174.0",
+    "netlify-cli": "^19.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
+    "react-speech-recognition": "^3.10.0",
+    "regenerator-runtime": "^0.14.1",
+    "stripe": "^17.7.0",
     "three": "^0.174.0"
   },
   "devDependencies": {

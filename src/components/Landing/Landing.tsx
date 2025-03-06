@@ -1,8 +1,15 @@
 import { useState, useEffect } from "react";
-import Template from "../Template/Template";
-import Model from "../Model/Model";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import {
+  faMicrophone,
+  faMicrophoneSlash,
+} from "@fortawesome/free-solid-svg-icons";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
+import Template from "../Template/Template";
+import { Model } from "../Model/Model";
 
 import "./Landing.css";
 
@@ -12,25 +19,54 @@ const duckModels = [
 ];
 
 function Landing() {
-  // State to keep track of the
-  // current duck model index
+  const navigate = useNavigate();
   const [currentDuckIndex, setCurrentDuckIndex] = useState(0);
+  const [inputValue, setInputValue] = useState(""); // Add state for input value
 
-  // Effect to switch the duck
-  // model every 10 seconds
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+  // Update input value when transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setInputValue((prev) => prev + " " + transcript);
+      resetTranscript();
+    }
+  }, [listening]);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // Move to the next duck model
-      // (cycling back to the first when reaching the end)
       setCurrentDuckIndex((prevIndex) => (prevIndex + 1) % duckModels.length);
     }, 10000);
 
-    // Clean up the interval when
-    // the component is unmounted
     return () => clearInterval(intervalId);
   }, []);
 
-  // Get the current duck model data
+  // Handle microphone click
+  const handleMicrophoneClick = () => {
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      // Configure continuous listening
+      SpeechRecognition.startListening({
+        continuous: true,
+        language: "en-US",
+      });
+    }
+  };
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  if (!browserSupportsSpeechRecognition) {
+    console.log("Browser doesn't support speech recognition.");
+  }
+
   const currentDuck = duckModels[currentDuckIndex];
 
   return (
@@ -42,13 +78,29 @@ function Landing() {
       <Model modelUrl={currentDuck.url} description={currentDuck.description} />
       <div id="prompt-input-wrapper">
         <div id="prompt-input">
-          <input type="text" placeholder="Describe your desired duck" />
+          <input
+            type="text"
+            placeholder="Describe your desired duck"
+            value={inputValue}
+            onChange={handleInputChange}
+          />
         </div>
         <div id="prompt-action-buttons">
-          <div className="prompt-action-button">
-            <FontAwesomeIcon icon={faMicrophone} id="prompt-action-speech" />
+          <div className="prompt-action-button" onClick={handleMicrophoneClick}>
+            {listening ? (
+              <FontAwesomeIcon
+                icon={faMicrophoneSlash}
+                id="prompt-action-speech"
+              />
+            ) : (
+              <FontAwesomeIcon icon={faMicrophone} id="prompt-action-speech" />
+            )}
           </div>
-          <div className="prompt-action-button" id="prompt-action-proceed">
+          <div
+            className="prompt-action-button"
+            id="prompt-action-proceed"
+            onClick={() => navigate("/exhibit")}
+          >
             +
           </div>
         </div>

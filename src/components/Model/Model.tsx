@@ -137,4 +137,4 @@ class ErrorBoundary extends Component<{
   }
 }
 
-export default Model;
+export { Model, ModelViewer };
