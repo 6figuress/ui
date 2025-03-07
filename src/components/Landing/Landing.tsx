@@ -16,6 +16,7 @@ import "./Landing.css";
 const duckModels = [
   { url: "/models/leather_duck.glb", description: "Rockstar duck" },
   { url: "/models/mj_duck.glb", description: "King of pop duck" },
+  { url: "/models/chinese_duck.glb", description: "Chinese duck" },
 ];
 
 function Landing() {

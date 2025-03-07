@@ -2,7 +2,7 @@ import { Handler } from "@netlify/functions";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-02-24.acacia",
 });
 
 const handler: Handler = async (event) => {
@@ -33,13 +33,26 @@ const handler: Handler = async (event) => {
       ],
       mode: "payment",
       success_url: `${process.env.URL || "http://localhost:5173"}/success`,
-      cancel_url: `${process.env.URL || "http://localhost:5173"}/order`,
+      cancel_url: `${process.env.URL || "http://localhost:5173"}`,
       customer_email: email,
+    });
+
+    // Save the order to Notion
+    await fetch(`${process.env.URL}/.netlify/functions/save-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        duckUrl,
+        sessionId: session.id,
+      }),
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ sessionId: session.id }), // Note: changed 'id' to 'sessionId'
+      body: JSON.stringify({ sessionId: session.id }),
     };
   } catch (error) {
     console.error("Error:", error);

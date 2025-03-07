@@ -5,7 +5,6 @@ import Template from "../Template/Template";
 import { Model } from "../Model/Model";
 import "./Order.css";
 
-// Make sure you have the correct environment variable
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface OrderLocationState {
@@ -25,6 +24,12 @@ function Order() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && emailInput && !isLoading) {
+      handleOrderSubmit();
+    }
+  };
+
   const handleOrderSubmit = async () => {
     if (!isValidEmail(emailInput)) {
       setError("Please enter a valid email address");
@@ -35,13 +40,13 @@ function Order() {
       setIsLoading(true);
       setError(null);
 
-      // 1. Get Stripe instance
+      // Get Stripe instance
       const stripe = await stripePromise;
       if (!stripe) {
         throw new Error("Stripe failed to initialize");
       }
 
-      // 2. Create checkout session
+      // Create checkout session
       const response = await fetch(
         "/.netlify/functions/create-checkout-session",
         {
@@ -62,9 +67,9 @@ function Order() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      // 3. Redirect to checkout
+      // Redirect to checkout
       const { error } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId, // Make sure this matches the response from your server
+        sessionId: data.sessionId,
       });
 
       if (error) {
@@ -95,6 +100,7 @@ function Order() {
             placeholder="Please provide your email"
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           {error && (
             <div
