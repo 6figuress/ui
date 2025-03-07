@@ -20,6 +20,7 @@
     "@stripe/stripe-js": "^5.9.2",
     "@types/nodemailer": "^6.4.17",
     "@types/three": "^0.174.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.42.0",
     "netlify-cli": "^19.0.2",
     "nodemailer": "^6.10.0",
     "react": "^19.0.0",
@@ -28,7 +29,8 @@
     "react-speech-recognition": "^3.10.0",
     "regenerator-runtime": "^0.14.1",
     "stripe": "^17.7.0",
-    "three": "^0.174.0"
+    "three": "^0.174.0",
+    "web-speech-cognitive-services": "^8.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
