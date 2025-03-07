@@ -188,7 +188,7 @@ function Exhibit() {
   }, []);
 
   return (
-    <Template>
+    <Template onBackClick={() => navigate(-1)}>
       <div id="title-wrapper">
         <h1>Order your duck</h1>
         <h1>Right now</h1>

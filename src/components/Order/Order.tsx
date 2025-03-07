@@ -84,7 +84,7 @@ function Order() {
   };
 
   return (
-    <Template>
+    <Template onBackClick={() => navigate(-1)}>
       <div id="title-wrapper">
         <h1>Please confirm</h1>
         <h1>your order</h1>
