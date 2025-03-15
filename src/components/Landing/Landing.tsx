@@ -37,11 +37,14 @@ const duckModels = [
   { url: "/models/chinese_duck.glb", description: "Chinese duck" },
   { url: "/models/police_duck.glb", description: "Police duck" },
   { url: "/models/swiss_duck.glb", description: "Swiss duck" },
+  { url: "/models/mudry_duck.glb", description: "??? duck" },
 ];
 
 function Landing() {
   const navigate = useNavigate();
-  const [currentDuckIndex, setCurrentDuckIndex] = useState(0);
+  const [currentDuckIndex, setCurrentDuckIndex] = useState(
+    Math.floor(Math.random() * duckModels.length),
+  );
   const [inputValue, setInputValue] = useState("");
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
 
@@ -56,10 +59,16 @@ function Landing() {
     clearTranscriptOnListen: true,
   });
 
+  // Cleanup function for speech recognition
+  const cleanupSpeechRecognition = () => {
+    SpeechRecognition.stopListening();
+    resetTranscript();
+  };
+
   // Update input value whenever transcript changes
   useEffect(() => {
     if (transcript) {
-      setInputValue(transcript); // Replace the text instead of appending
+      setInputValue(transcript);
     }
   }, [transcript]);
 
@@ -74,25 +83,43 @@ function Landing() {
   // Cleanup effect
   useEffect(() => {
     return () => {
-      SpeechRecognition.stopListening();
+      cleanupSpeechRecognition();
     };
   }, []);
 
+  // Effect to handle speech recognition abort
+  useEffect(() => {
+    const handleSpeechEnd = () => {
+      if (listening) {
+        cleanupSpeechRecognition();
+      }
+    };
+
+    window.addEventListener("speechend", handleSpeechEnd);
+
+    return () => {
+      window.removeEventListener("speechend", handleSpeechEnd);
+    };
+  }, [listening]);
+
   const handleMicrophoneClick = async () => {
     if (listening) {
-      await SpeechRecognition.stopListening();
+      cleanupSpeechRecognition();
     } else {
       try {
         setInputValue(""); // Clear input when starting new recording
         resetTranscript(); // Reset transcript when starting new recording
+        // Add a small delay before starting new recognition
+        await new Promise((resolve) => setTimeout(resolve, 100));
         await SpeechRecognition.startListening({
           continuous: true,
           language: "en-US",
-          interimResults: true, // Enable interim results for more responsive recognition
+          interimResults: true,
         });
       } catch (error) {
         console.error("Error starting speech recognition:", error);
         setIsSpeechSupported(false);
+        cleanupSpeechRecognition();
       }
     }
   };

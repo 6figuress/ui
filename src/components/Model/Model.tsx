@@ -74,22 +74,22 @@ function Model({ modelUrl, description }: ModelProps) {
             gl={{
               antialias: true,
               toneMapping: THREE.ACESFilmicToneMapping,
-              toneMappingExposure: 1.0,
+              toneMappingExposure: 1.5,
             }}
           >
-            <ambientLight intensity={1.2} />
+            <ambientLight intensity={2.0} />
             <spotLight
               position={[5, 10, 5]}
               angle={0.3}
               penumbra={1}
-              intensity={1.5}
+              intensity={2}
               castShadow={false}
             />
             <spotLight
               position={[-5, 10, -5]}
               angle={0.3}
               penumbra={1}
-              intensity={1}
+              intensity={1.5}
               castShadow
             />
             <pointLight position={[0, 5, 0]} intensity={0.8} />

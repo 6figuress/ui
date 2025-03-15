@@ -11,6 +11,7 @@ function Success() {
       <div id="success-wrapper">
         <div id="title-wrapper">
           <h1>Thanks for your order</h1>
+          <h1>Delivery will arrive within 7 days</h1>
           <h1>Further information</h1>
           <h1>via email</h1>
         </div>
