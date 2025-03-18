@@ -13,13 +13,13 @@ import * as THREE from "three";
 import Template from "../Template/Template";
 import "./Exhibit.css";
 import { useNavigate } from "react-router-dom";
+import { getDuckData, clearDuckData } from "../../utils/indexedDB";
 
-// Duck data with IDs, URLs, and names
 const DUCKS = [
   { id: 1, url: "/models/mj_duck.glb", name: "King of Pop Duck" },
-  { id: 2, url: "/models/mj_duck.glb", name: "King of Pop Duck" },
-  { id: 3, url: "/models/mj_duck.glb", name: "King of Pop Duck" },
-  { id: 4, url: "/models/mj_duck.glb", name: "King of Pop Duck" },
+  { id: 2, url: "/models/leather_duck.glb", name: "Rockstar Duck" },
+  { id: 3, url: "/models/chinese_duck.glb", name: "Chinese Duck" },
+  { id: 4, url: "/models/police_duck.glb", name: "Police Duck" },
 ];
 
 function SelectableDuck({
@@ -29,6 +29,7 @@ function SelectableDuck({
   isSelected,
   anyDuckSelected,
   onSelect,
+  name,
 }: {
   modelUrl: string;
   position: [number, number, number];
@@ -36,21 +37,17 @@ function SelectableDuck({
   isSelected: boolean;
   anyDuckSelected: boolean;
   onSelect: (id: number) => void;
+  name: string;
 }) {
   const gltf = useLoader(GLTFLoader, modelUrl);
   const modelRef = useRef<THREE.Group>(null);
   const originalMaterialsRef = useRef(new Map());
-
-  // Clone the scene to avoid shared materials
   const model = useMemo(() => gltf.scene.clone(), [gltf.scene]);
 
-  // Store original materials on first render
   useEffect(() => {
     if (!model) return;
-
     model.traverse((node: any) => {
       if (node.isMesh && node.material) {
-        // Store a reference to the original material if not already stored
         if (!originalMaterialsRef.current.has(node.uuid)) {
           originalMaterialsRef.current.set(node.uuid, node.material.clone());
         }
@@ -58,54 +55,36 @@ function SelectableDuck({
     });
   }, [model]);
 
-  // Make the duck spin
   useFrame(() => {
     if (modelRef.current) {
-      // Rotate faster by default, slower when selected
       modelRef.current.rotation.y +=
         anyDuckSelected && !isSelected ? 0.002 : 0.01;
     }
   });
 
-  const scale = 1.5;
-
-  // Apply materials based on selection state
   useEffect(() => {
     if (!model) return;
-
     model.traverse((node: any) => {
       if (node.isMesh) {
-        // Only apply gray material if a duck is
-        // selected and this duck is not the selected one
         if (anyDuckSelected && !isSelected) {
-          // Apply metallic gray material
-          // for unselected ducks
           const grayMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x888888),
             metalness: 0.9,
             roughness: 0.3,
             envMapIntensity: 1.0,
           });
-
-          // Apply the gray material
           node.material = grayMaterial;
         } else {
-          // Restore original colorful material
-          // for selected duck or when no duck is selected
           const originalMaterial = originalMaterialsRef.current.get(node.uuid);
           if (originalMaterial) {
             node.material = originalMaterial.clone();
           }
         }
-
-        // Always ensure material is updated
         node.material.needsUpdate = true;
       }
     });
   }, [model, isSelected, anyDuckSelected]);
 
-  // Function to find the canvas
-  // element and apply pointer cursor
   const setCursorStyle = (isPointer: boolean) => {
     const canvas = document.querySelector("#model-grid canvas");
     if (canvas) {
@@ -122,7 +101,7 @@ function SelectableDuck({
       <primitive
         ref={modelRef}
         object={model}
-        scale={scale}
+        scale={1.5}
         onClick={(e) => {
           e.stopPropagation();
           onSelect(id);
@@ -140,43 +119,76 @@ function SelectableDuck({
   );
 }
 
-// Main Exhibit component
 function Exhibit() {
   const navigate = useNavigate();
   const [selectedDuckId, setSelectedDuckId] = useState<number | null>(null);
+  const [generatedDuckUrls, setGeneratedDuckUrls] = useState<string[]>([]);
+  const [promptDescription, setPromptDescription] = useState<string>("");
 
-  const handleSelectDuck = useCallback((id: number) => {
-    setSelectedDuckId((prevId) => {
-      // If we click other duck than currently selected, select it
-      if (prevId !== id) {
-        return id;
-      } else {
-        return prevId;
+  useEffect(() => {
+    const loadDucks = async () => {
+      try {
+        const data = await getDuckData();
+
+        if (data && data.ducks) {
+          const urls = data.ducks.map((duckData: string) => {
+            const binaryString = window.atob(duckData);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: "model/gltf-binary" });
+            return URL.createObjectURL(blob);
+          });
+
+          setGeneratedDuckUrls(urls);
+          setPromptDescription(data.prompt);
+        }
+      } catch (error) {
+        console.error("Error loading duck data:", error);
       }
-    });
+    };
+
+    loadDucks();
+
+    return () => {
+      generatedDuckUrls.forEach((url) => URL.revokeObjectURL(url));
+      clearDuckData().catch(console.error);
+    };
   }, []);
 
-  // Get the selected duck data
-  const selectedDuck = DUCKS.find((duck) => duck.id === selectedDuckId);
+  const displayDucks = useMemo(() => {
+    if (generatedDuckUrls.length > 0) {
+      return generatedDuckUrls.map((url, index) => ({
+        id: index + 1,
+        url,
+        name: `Generated Duck ${index + 1}`,
+      }));
+    }
+    return DUCKS;
+  }, [generatedDuckUrls]);
 
-  // Handle proceeding to order
+  const handleSelectDuck = useCallback((id: number) => {
+    setSelectedDuckId((prevId) => (prevId !== id ? id : prevId));
+  }, []);
+
+  const selectedDuck = displayDucks.find((duck) => duck.id === selectedDuckId);
+
   const handleProceedToOrder = () => {
     if (selectedDuck) {
       navigate("/order", {
         state: {
           selectedDuckUrl: selectedDuck.url,
-          selectedDuckDescription: selectedDuck.name,
+          selectedDuckDescription:
+            selectedDuck.id === 1 ? promptDescription : selectedDuck.name,
         },
       });
     }
   };
 
-  // Check if any duck is selected
   const anyDuckSelected = selectedDuckId !== null;
-  // Grid spacing configuration
   const gridSpacing = 2.0;
 
-  // Make sure cursor is reset when component unmounts
   useEffect(() => {
     return () => {
       document.body.style.cursor = "auto";
@@ -221,12 +233,9 @@ function Exhibit() {
           <Environment preset="studio" background={false} />
 
           <Suspense fallback={<Html center>Loading models...</Html>}>
-            {DUCKS.map((duck, index) => {
-              // Calculate positions in a grid with equal spacing
+            {displayDucks.map((duck, index) => {
               const row = Math.floor(index / 2);
               const col = index % 2;
-
-              // Use same spacing for x and y
               const x = col === 0 ? -gridSpacing : gridSpacing;
               const y = row === 0 ? gridSpacing : -gridSpacing;
 
@@ -239,6 +248,7 @@ function Exhibit() {
                   isSelected={selectedDuckId === duck.id}
                   anyDuckSelected={anyDuckSelected}
                   onSelect={handleSelectDuck}
+                  name={duck.name}
                 />
               );
             })}
@@ -250,7 +260,11 @@ function Exhibit() {
             maxPolarAngle={Math.PI / 1.5}
           />
         </Canvas>
-        <h3 id="collection-description">King of pop duck</h3>
+        <h3 id="collection-description">
+          {selectedDuckId === 1 && promptDescription
+            ? promptDescription
+            : selectedDuck?.name || "Select a duck"}
+        </h3>
       </div>
       <div id="exhibit-actions-wrapper">
         <div id="exhibit-action-description">
@@ -261,13 +275,7 @@ function Exhibit() {
           </h3>
         </div>
         <div id="exhibit-actions">
-          <h4
-            onClick={() => {
-              navigate(-1);
-            }}
-          >
-            Go back
-          </h4>
+          <h4 onClick={() => navigate(-1)}>Go back</h4>
           <span>&nbsp;or&nbsp;</span>
           <h4
             onClick={handleProceedToOrder}

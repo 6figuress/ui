@@ -11,6 +11,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import Template from "../Template/Template";
 import { Model } from "../Model/Model";
+import { storeDuckData } from "../../utils/indexedDB";
 
 import "./Landing.css";
 
@@ -59,13 +60,11 @@ function Landing() {
     clearTranscriptOnListen: true,
   });
 
-  // Cleanup function for speech recognition
   const cleanupSpeechRecognition = () => {
     SpeechRecognition.stopListening();
     resetTranscript();
   };
 
-  // Update input value whenever transcript changes
   useEffect(() => {
     if (transcript) {
       setInputValue(transcript);
@@ -80,14 +79,12 @@ function Landing() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Cleanup effect
   useEffect(() => {
     return () => {
       cleanupSpeechRecognition();
     };
   }, []);
 
-  // Effect to handle speech recognition abort
   useEffect(() => {
     const handleSpeechEnd = () => {
       if (listening) {
@@ -107,9 +104,8 @@ function Landing() {
       cleanupSpeechRecognition();
     } else {
       try {
-        setInputValue(""); // Clear input when starting new recording
-        resetTranscript(); // Reset transcript when starting new recording
-        // Add a small delay before starting new recognition
+        setInputValue("");
+        resetTranscript();
         await new Promise((resolve) => setTimeout(resolve, 100));
         await SpeechRecognition.startListening({
           continuous: true,
@@ -128,7 +124,6 @@ function Landing() {
     setInputValue(e.target.value);
   };
 
-  // Check if speech recognition is supported and microphone is available
   useEffect(() => {
     if (!browserSupportsSpeechRecognition || !isMicrophoneAvailable) {
       setIsSpeechSupported(false);
@@ -137,6 +132,42 @@ function Landing() {
       );
     }
   }, [browserSupportsSpeechRecognition, isMicrophoneAvailable]);
+
+  const handleProceed = async () => {
+    if (!inputValue.trim()) {
+      return;
+    }
+
+    try {
+      const requests = Array(4)
+        .fill(null)
+        .map(() =>
+          fetch("http://127.0.0.1:5000/api/texture", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ user_prompt: inputValue }),
+            mode: "cors",
+          }),
+        );
+
+      const responses = await Promise.all(requests);
+      const jsonData = await Promise.all(responses.map((res) => res.json()));
+      const duckData = jsonData.map((data) => data.glb_data);
+
+      // Store data in IndexedDB
+      await storeDuckData({
+        ducks: duckData,
+        prompt: inputValue,
+      });
+
+      navigate("/exhibit");
+    } catch (error) {
+      console.error("Error generating ducks:", error);
+    }
+  };
 
   const currentDuck = duckModels[currentDuckIndex];
 
@@ -179,7 +210,7 @@ function Landing() {
           <div
             className="prompt-action-button"
             id="prompt-action-proceed"
-            onClick={() => navigate("/exhibit")}
+            onClick={handleProceed}
           >
             +
           </div>
