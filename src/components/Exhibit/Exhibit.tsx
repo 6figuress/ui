@@ -29,7 +29,6 @@ function SelectableDuck({
   isSelected,
   anyDuckSelected,
   onSelect,
-  name,
 }: {
   modelUrl: string;
   position: [number, number, number];
@@ -162,7 +161,7 @@ function Exhibit() {
       return generatedDuckUrls.map((url, index) => ({
         id: index + 1,
         url,
-        name: `Generated Duck ${index + 1}`,
+        name: promptDescription,
       }));
     }
     return DUCKS;

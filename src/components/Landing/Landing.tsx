@@ -11,6 +11,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import Template from "../Template/Template";
 import { Model } from "../Model/Model";
+import Loading from "../Loading/Loading";
 import { storeDuckData } from "../../utils/indexedDB";
 
 import "./Landing.css";
@@ -48,6 +49,7 @@ function Landing() {
   );
   const [inputValue, setInputValue] = useState("");
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     transcript,
@@ -138,6 +140,8 @@ function Landing() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const requests = Array(4)
         .fill(null)
@@ -157,7 +161,6 @@ function Landing() {
       const jsonData = await Promise.all(responses.map((res) => res.json()));
       const duckData = jsonData.map((data) => data.glb_data);
 
-      // Store data in IndexedDB
       await storeDuckData({
         ducks: duckData,
         prompt: inputValue,
@@ -166,8 +169,13 @@ function Landing() {
       navigate("/exhibit");
     } catch (error) {
       console.error("Error generating ducks:", error);
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Loading userPrompt={inputValue} />;
+  }
 
   const currentDuck = duckModels[currentDuckIndex];
 
