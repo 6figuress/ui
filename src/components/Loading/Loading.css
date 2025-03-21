@@ -17,7 +17,7 @@
     line-height: 1.6;
     font-size: 1.1rem;
     white-space: pre-wrap;
-    height: 50%; /* or adjust to your preferred height */
+    height: 75%; /* or adjust to your preferred height */
     overflow-y: auto;
     /* Remove scrollbar appearance but keep functionality */
     scrollbar-width: none; /* Firefox */
@@ -27,4 +27,25 @@
 /* Hide scrollbar for Chrome, Safari and Opera */
 .loading-text::-webkit-scrollbar {
     display: none;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    height: 0.8rem;
+    background-color: var(--main-foreground-color);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }

@@ -7,11 +7,19 @@ interface LoadingProps {
 }
 
 function Loading({ userPrompt }: LoadingProps) {
-  const [responseText, setResponseText] = useState("");
+  const [responseText, setResponseText] = useState(
+    "Let me take a look into my bookshelf for a second..",
+  );
   const [fullText, setFullText] = useState("");
   const textBoxRef = useRef<HTMLDivElement>(null);
+  const didFetchRef = useRef<boolean>(false);
 
   useEffect(() => {
+    // Only perform the fetch if
+    // it hasn't been done yet
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
+
     const abortController = new AbortController();
 
     const streamResponse = async () => {
@@ -93,12 +101,13 @@ function Loading({ userPrompt }: LoadingProps) {
     <Template>
       <div className="loading-container">
         <div className="loading-content">
-          <h1>
+          <h2>
             While your ducks are being crafted, let me tell you a story about{" "}
             {userPrompt}
-          </h1>
+          </h2>
           <div className="loading-text" ref={textBoxRef}>
             {responseText}
+            <span className="cursor" />
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 interface OrderLocationState {
   selectedDuckUrl: string;
   selectedDuckDescription: string;
+  encodedDuckData: string;
 }
 
 function Order() {
@@ -56,7 +57,7 @@ function Order() {
           },
           body: JSON.stringify({
             email: emailInput,
-            duckUrl: state?.selectedDuckUrl,
+            duckUrl: state?.encodedDuckData,
           }),
         },
       );

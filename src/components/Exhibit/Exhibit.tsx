@@ -96,24 +96,22 @@ function SelectableDuck({
   };
 
   return (
-    <group position={position}>
-      <primitive
-        ref={modelRef}
-        object={model}
-        scale={1.5}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect(id);
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setCursorStyle(true);
-        }}
-        onPointerOut={(e) => {
-          e.stopPropagation();
-          setCursorStyle(false);
-        }}
-      />
+    <group
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setCursorStyle(true);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setCursorStyle(false);
+      }}
+    >
+      <primitive ref={modelRef} object={model} scale={1.5} />
     </group>
   );
 }
@@ -152,7 +150,6 @@ function Exhibit() {
 
     return () => {
       generatedDuckUrls.forEach((url) => URL.revokeObjectURL(url));
-      clearDuckData().catch(console.error);
     };
   }, []);
 
@@ -173,15 +170,25 @@ function Exhibit() {
 
   const selectedDuck = displayDucks.find((duck) => duck.id === selectedDuckId);
 
-  const handleProceedToOrder = () => {
+  const handleProceedToOrder = async () => {
     if (selectedDuck) {
+      // Get the duck data from indexedDB
+      const duckData = await getDuckData();
+
+      // Find the corresponding encoded data
+      const selectedDuckIndex = selectedDuck.id - 1;
+      const encodedDuckData = duckData.ducks[selectedDuckIndex];
+
       navigate("/order", {
         state: {
           selectedDuckUrl: selectedDuck.url,
           selectedDuckDescription:
             selectedDuck.id === 1 ? promptDescription : selectedDuck.name,
+          encodedDuckData: encodedDuckData,
         },
       });
+
+      clearDuckData().catch(console.error);
     }
   };
 

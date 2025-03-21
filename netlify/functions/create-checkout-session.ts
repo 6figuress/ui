@@ -51,7 +51,6 @@ const sendConfirmationEmail = async (
 
 Order Details:
 Session ID: ${sessionId}
-Model URL: ${duckUrl}
 
 We'll process your order as soon as possible and keep you updated on its status.
 
@@ -61,7 +60,6 @@ The duckers @ 6figures`,
       <h2>Thank you for your order!</h2>
       <h3>Order Details:</h3>
       <p><strong>Session ID:</strong> ${sessionId}</p>
-      <p><strong>Model URL:</strong> ${duckUrl}</p>
       <p>We'll process your order as soon as possible and keep you updated on its status.</p>
       <br>
       <p>Best regards,<br>The duckers @ 6figures</p>
@@ -118,7 +116,7 @@ const handler: Handler = async (event) => {
       },
       body: JSON.stringify({
         email,
-        duckUrl,
+        encodedGlbData: duckUrl,
         sessionId: session.id,
       }),
     });
