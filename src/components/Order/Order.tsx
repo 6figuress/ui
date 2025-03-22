@@ -58,6 +58,7 @@ function Order() {
           body: JSON.stringify({
             email: emailInput,
             duckUrl: state?.encodedDuckData,
+            description: state?.selectedDuckDescription,
           }),
         },
       );

@@ -24,7 +24,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    const { email, encodedGlbData, sessionId } = JSON.parse(event.body || "{}");
+    const { email, encodedGlbData, sessionId, description } = JSON.parse(
+      event.body || "{}",
+    );
 
     if (!encodedGlbData || !email || !sessionId) {
       return {
@@ -73,7 +75,7 @@ const handler: Handler = async (event) => {
           title: [
             {
               text: {
-                content: `Order ${sessionId}`,
+                content: description,
               },
             },
           ],
