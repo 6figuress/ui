@@ -1,20 +1,18 @@
 import { Handler } from "@netlify/functions";
 import { Client } from "@notionhq/client";
-import { getStore } from "@netlify/blobs";
-import { Buffer } from "buffer";
+import { v2 as cloudinary } from "cloudinary";
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
 const DATABASE_ID = process.env.NOTION_DATABASE_ID;
-const SITE_ID = process.env.NETLIFY_SITE_ID;
 
-// Create blob store with explicit configuration
-const store = getStore({
-  name: "duck-models",
-  siteID: SITE_ID || "",
-  token: process.env.NETLIFY_API_TOKEN || "",
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const handler: Handler = async (event) => {
@@ -28,23 +26,46 @@ const handler: Handler = async (event) => {
   try {
     const { email, encodedGlbData, sessionId } = JSON.parse(event.body || "{}");
 
-    // Generate a unique filename
-    const fileName = `${sessionId}.glb`;
+    if (!encodedGlbData || !email || !sessionId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "Missing required fields",
+          received: {
+            hasEmail: !!email,
+            hasGlbData: !!encodedGlbData,
+            hasSessionId: !!sessionId,
+          },
+        }),
+      };
+    }
 
-    // Store the file
-    const buffer = Buffer.from(encodedGlbData, "base64");
-    await store.set(fileName, buffer, {
-      type: "model/gltf-binary",
-      metadata: {
-        cacheControl: "public, max-age=31536000", // Cache for 1 year
-      },
-      access: "public", // Make the blob public
+    // Upload to Cloudinary
+    const uploadResponse = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw",
+          public_id: `orders/${sessionId}`,
+          format: "glb",
+        },
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        },
+      );
+
+      uploadStream.write(Buffer.from(encodedGlbData, "base64"));
+      uploadStream.end();
     });
 
-    // Construct the public URL
-    const blobUrl = `https://${SITE_ID}--duck-models.netlify.app/.netlify/blobs/${fileName}`;
-    console.log("Generated blob URL:", blobUrl);
+    const fileUrl = uploadResponse.secure_url;
+    console.log("File uploaded successfully:", fileUrl);
 
+    // Create Notion page
     await notion.pages.create({
       parent: { database_id: DATABASE_ID! },
       properties: {
@@ -60,10 +81,10 @@ const handler: Handler = async (event) => {
         "Model File": {
           files: [
             {
-              name: fileName,
+              name: `${sessionId}.glb`,
               type: "external",
               external: {
-                url: blobUrl,
+                url: fileUrl,
               },
             },
           ],
@@ -96,7 +117,7 @@ const handler: Handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         message: "Order saved successfully",
-        blobUrl: blobUrl,
+        fileUrl: fileUrl,
       }),
     };
   } catch (error) {
