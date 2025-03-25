@@ -15,10 +15,16 @@ import "./Model.css";
 interface ModelProps {
   modelUrl: string;
   description: string;
+  position?: [number, number, number];
+}
+
+interface ModelViewerProps {
+  modelUrl: string;
+  position?: [number, number, number];
 }
 
 // This component loads and renders the 3D model
-function ModelViewer({ modelUrl }: { modelUrl: string }) {
+function ModelViewer({ modelUrl, position = [0, 0, 0] }: ModelViewerProps) {
   const gltf = useLoader(GLTFLoader, modelUrl);
   const modelRef = useRef<THREE.Group>(null);
 
@@ -57,12 +63,12 @@ function ModelViewer({ modelUrl }: { modelUrl: string }) {
       ref={modelRef}
       object={gltf.scene}
       scale={1.5}
-      position={[0, 0, 0]}
+      position={position}
     />
   );
 }
 
-function Model({ modelUrl, description }: ModelProps) {
+function Model({ modelUrl, description, position }: ModelProps) {
   const [modelError, setModelError] = useState<string | null>(null);
 
   return (
@@ -95,7 +101,7 @@ function Model({ modelUrl, description }: ModelProps) {
             <pointLight position={[0, 5, 0]} intensity={0.8} />
             <Environment preset="park" background={false} />
             <Suspense fallback={<Loader />}>
-              <ModelViewer modelUrl={modelUrl} />
+              <ModelViewer modelUrl={modelUrl} position={position} />
             </Suspense>
             <OrbitControls enableZoom={true} enablePan={true} />
           </Canvas>

@@ -94,6 +94,7 @@ function Order() {
       <Model
         modelUrl={state?.selectedDuckUrl}
         description={state?.selectedDuckDescription}
+        position={[0, -1, 0]}
       />
       <div id="prompt-input-wrapper">
         <div id="prompt-input">

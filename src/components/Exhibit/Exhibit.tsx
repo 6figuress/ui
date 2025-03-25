@@ -71,6 +71,7 @@ function SelectableDuck({
             metalness: 0.9,
             roughness: 0.3,
             envMapIntensity: 1.0,
+            side: THREE.DoubleSide,
           });
           node.material = grayMaterial;
         } else {
@@ -243,7 +244,7 @@ function Exhibit() {
               const row = Math.floor(index / 2);
               const col = index % 2;
               const x = col === 0 ? -gridSpacing : gridSpacing;
-              const y = row === 0 ? gridSpacing : -gridSpacing;
+              const y = (row === 0 ? gridSpacing : -gridSpacing) - 1;
 
               return (
                 <SelectableDuck
