@@ -31,8 +31,6 @@ ENV NETLIFY_AUTH_TOKEN=$NETLIFY_AUTH_TOKEN
 ARG NETLIFY_SITE_ID
 ENV NETLIFY_SITE_ID=$NETLIFY_SITE_ID
 
-RUN netlify link
-
 # Copy package files and install dependencies
 COPY package.json ./
 RUN bun install
@@ -45,4 +43,4 @@ COPY .env ./
 
 EXPOSE 8888
 
-CMD ["bun", "run", "netlify", "dev", "--port", "8888""]
+CMD ["netlify", "link", "&&", "bun", "run", "netlify", "dev", "--port", "8888""]
