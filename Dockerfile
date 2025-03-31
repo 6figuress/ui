@@ -26,6 +26,9 @@ ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 # Install netlify-cli globally
 RUN npm install -g netlify-cli
 
+ARG NETLIFY_AUTH_TOKEN
+ENV NETLIFY_AUTH_TOKEN=$NETLIFY_AUTH_TOKEN
+
 # Copy package files and install dependencies
 COPY package.json ./
 RUN bun install
@@ -38,5 +41,4 @@ COPY .env ./
 
 EXPOSE 8888
 
-ARG NETLIFY_AUTH_TOKEN
 CMD netlify login --auth $NETLIFY_AUTH_TOKEN && bun run netlify dev --port 8888
