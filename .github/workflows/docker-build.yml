@@ -36,6 +36,8 @@ jobs:
             dij0s/ui:${{ github.sha }}
           cache-from: type=registry,ref=dij0s/ui:buildcache
           cache-to: type=registry,ref=dij0s/ui:buildcache,mode=max
+          secret-files: |
+            "env_file=.env"
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}

@@ -34,7 +34,7 @@ RUN bun install
 COPY . .
 
 # Copy .env file
-COPY .env .env
+COPY .env ./
 
 EXPOSE 8888
 
