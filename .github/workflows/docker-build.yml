@@ -34,8 +34,6 @@ jobs:
           tags: |
             dij0s/ui:latest
             dij0s/ui:${{ github.sha }}
-          build-args: |
-            NETLIFY_AUTH_TOKEN=${{ secrets.NETLIFY_AUTH_TOKEN }}
           cache-from: type=registry,ref=dij0s/ui:buildcache
           cache-to: type=registry,ref=dij0s/ui:buildcache,mode=max
           secret-files: |
