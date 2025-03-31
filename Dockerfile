@@ -38,4 +38,5 @@ COPY .env ./
 
 EXPOSE 8888
 
-CMD ["bun", "run", "netlify", "dev", "--port", "8888"]
+# CMD ["bun", "run", "netlify", "dev", "--port", "8888"]
+CMD ["netlify", "status"]
