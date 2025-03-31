@@ -38,5 +38,4 @@ COPY .env ./
 
 EXPOSE 8888
 
-# CMD ["bun", "run", "netlify", "dev", "--port", "8888"]
-CMD ["netlify", "status"]
+CMD netlify login --auth $NETLIFY_AUTH_TOKEN && bun run netlify dev --port 8888
