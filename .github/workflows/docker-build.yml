@@ -3,11 +3,6 @@ name: UI Docker Build
 on:
   push:
     branches: [main]
-    paths:
-      - "src/**"
-      - "package.json"
-      - "bun.lockb"
-      - "Dockerfile"
   pull_request:
     branches: [main]
 
