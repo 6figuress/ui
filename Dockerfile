@@ -43,4 +43,4 @@ COPY .env ./
 
 EXPOSE 8888
 
-CMD netlify link && bun run netlify dev --port 8888
+CMD netlify link --id $NETLIFY_SITE_ID && bun run netlify dev --port 8888
