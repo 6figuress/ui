@@ -25,6 +25,9 @@ ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 # Install netlify-cli globally
 RUN npm install -g netlify-cli
+# Login to netlify account
+ARG NETLIFY_AUTH_TOKEN
+RUN netlify login --auth $NETLIFY_AUTH_TOKEN
 
 # Copy package files and install dependencies
 COPY package.json ./
