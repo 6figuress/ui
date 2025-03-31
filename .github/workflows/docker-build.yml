@@ -37,10 +37,10 @@ jobs:
           context: .
           push: true
           tags: |
-            6figures/ui:latest
-            6figures/ui:${{ github.sha }}
-          cache-from: type=registry,ref=6figures/ui:buildcache
-          cache-to: type=registry,ref=6figures/ui:buildcache,mode=max
+            dij0s/ui:latest
+            dij0s/ui:${{ github.sha }}
+          cache-from: type=registry,ref=dij0s/ui:buildcache
+          cache-to: type=registry,ref=dij0s/ui:buildcache,mode=max
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
