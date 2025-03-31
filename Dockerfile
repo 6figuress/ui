@@ -38,4 +38,5 @@ COPY .env ./
 
 EXPOSE 8888
 
+ARG NETLIFY_AUTH_TOKEN
 CMD netlify login --auth $NETLIFY_AUTH_TOKEN && bun run netlify dev --port 8888
